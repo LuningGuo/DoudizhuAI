@@ -21,12 +21,12 @@ def get_primal_str(hc):
     return p_str_all
 
 
-def transform(data):
+def transform(call_data):
     card_array_list = list()
-    for row in range(data.shape[0]):
+    for row in range(call_data.shape[0]):
         card_dict = {i: 0 for i in range(1, 16)}
-        for col in range(data.shape[1]):
-            card_dict[data[row, col]] += 1
+        for col in range(call_data.shape[1]):
+            card_dict[call_data[row, col]] += 1
         card_array = np.array(list(card_dict.values())).reshape((1, 15))
         card_array_list.append(card_array)
     return np.concatenate(card_array_list, axis=0)
@@ -56,14 +56,13 @@ if __name__ == '__main__':
         features = np.concatenate([features, feature], axis=0)
     print('\n', features.shape, sep='')
 
-    # training and validation
-    X_train, X_test, y_train, y_test = train_test_split(features, y, test_size=0.25)
+    # call landlord model
     model = LogisticRegression(max_iter=500)
-    model.fit(X_train, y_train)
-    y_pred = model.predict(X_test)
-    print(f'Accuracy score: {accuracy_score(y_test, y_pred)}')
+    model.fit(X_transformed, y)
+    with open('call_landlord_model.pkl', 'wb') as file:
+        pickle.dump(model, file)
 
-    # re-train on the whole dataset and save the model
+    # score model
     model = LogisticRegression(max_iter=500)
     model.fit(features, y)
     with open('score_model.pkl', 'wb') as file:
